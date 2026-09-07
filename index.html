@@ -126,8 +126,8 @@
         textarea.form-control { resize: vertical; min-height: 100px; height: auto; }
         .btn-submit { width: 100%; padding: 16px; background: var(--primary); color: white; font-weight: 800; font-size: 1.1rem; border: none; border-radius: 14px; margin-top: 10px; box-shadow: 0 6px 20px rgba(139,92,246,0.3); text-transform: uppercase; cursor: pointer;}
         
-        /* BOTTOM SHEET */
-        .bottom-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: white; border-radius: 28px 28px 0 0; padding: 30px 24px env(safe-area-inset-bottom, 24px) 24px; box-shadow: 0 -10px 40px rgba(0,0,0,0.15); z-index: 2000; transition: bottom 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); max-width: 600px; margin: 0 auto; max-height: 92vh; overflow-y: auto;}
+        /* BOTTOM SHEET - MODIFICATO Z-INDEX A 2600 */
+        .bottom-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: white; border-radius: 28px 28px 0 0; padding: 30px 24px env(safe-area-inset-bottom, 24px) 24px; box-shadow: 0 -10px 40px rgba(0,0,0,0.15); z-index: 2600; transition: bottom 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); max-width: 600px; margin: 0 auto; max-height: 92vh; overflow-y: auto;}
         .bottom-sheet.active { bottom: 0; }
         .sheet-handle { width: 40px; height: 5px; background: var(--border); border-radius: 5px; margin: 0 auto 20px auto; }
         .sheet-title { font-size: 1.3rem; font-weight: 800; color: var(--text-main); margin-bottom: 8px; text-align: center;}
@@ -700,35 +700,70 @@
             });
         }
 
-        // --- FIRMA DIGITALE & SCONTRINO ---
+        // --- FIRMA DIGITALE & SCONTRINO (OTTIMIZZATO PER TOUCH/MOBILE) ---
         let signatureCtx, signatureCanvas, isDrawing = false;
-        
+        let lastPos = null;
+
         function initFirma() {
             signatureCanvas = document.getElementById('signature-pad');
-            signatureCtx = signatureCanvas.getContext('2d');
+            signatureCtx = signatureCanvas.getContext('2d', { willReadFrequently: true });
+            
             const rect = signatureCanvas.getBoundingClientRect();
-            signatureCanvas.width = rect.width;
-            signatureCanvas.height = rect.height;
-            signatureCtx.lineWidth = 3; signatureCtx.lineCap = 'round'; signatureCtx.strokeStyle = '#1e293b';
+            const dpr = window.devicePixelRatio || 1;
+            
+            signatureCanvas.width = rect.width * dpr;
+            signatureCanvas.height = rect.height * dpr;
+            signatureCtx.scale(dpr, dpr);
+            
+            signatureCanvas.style.width = rect.width + 'px';
+            signatureCanvas.style.height = rect.height + 'px';
+
+            signatureCtx.lineWidth = 3; 
+            signatureCtx.lineCap = 'round'; 
+            signatureCtx.lineJoin = 'round'; 
+            signatureCtx.strokeStyle = '#1e293b';
 
             const getPos = (e) => {
                 const rect = signatureCanvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return { x: clientX - rect.left, y: clientY - rect.top };
+                return { x: e.clientX - rect.left, y: e.clientY - rect.top };
             };
 
-            const start = (e) => { e.preventDefault(); isDrawing = true; const pos = getPos(e); signatureCtx.beginPath(); signatureCtx.moveTo(pos.x, pos.y); };
-            const draw = (e) => { e.preventDefault(); if(!isDrawing) return; const pos = getPos(e); signatureCtx.lineTo(pos.x, pos.y); signatureCtx.stroke(); };
-            const stop = () => { isDrawing = false; };
+            const start = (e) => { 
+                e.preventDefault(); 
+                isDrawing = true; 
+                lastPos = getPos(e); 
+                signatureCtx.beginPath(); 
+                signatureCtx.moveTo(lastPos.x, lastPos.y); 
+            };
 
-            signatureCanvas.addEventListener('mousedown', start);
-            signatureCanvas.addEventListener('mousemove', draw);
-            signatureCanvas.addEventListener('mouseup', stop);
-            signatureCanvas.addEventListener('mouseout', stop);
-            signatureCanvas.addEventListener('touchstart', start, {passive: false});
-            signatureCanvas.addEventListener('touchmove', draw, {passive: false});
-            signatureCanvas.addEventListener('touchend', stop);
+            const draw = (e) => { 
+                e.preventDefault(); 
+                if(!isDrawing || !lastPos) return; 
+                
+                const pos = getPos(e); 
+                
+                const midPoint = {
+                    x: lastPos.x + (pos.x - lastPos.x) / 2,
+                    y: lastPos.y + (pos.y - lastPos.y) / 2
+                };
+                
+                signatureCtx.quadraticCurveTo(lastPos.x, lastPos.y, midPoint.x, midPoint.y);
+                signatureCtx.stroke();
+                
+                lastPos = pos;
+            };
+
+            const stop = (e) => { 
+                e.preventDefault();
+                isDrawing = false; 
+                lastPos = null;
+            };
+
+            signatureCanvas.addEventListener('pointerdown', start, {passive: false});
+            signatureCanvas.addEventListener('pointermove', draw, {passive: false});
+            signatureCanvas.addEventListener('pointerup', stop);
+            signatureCanvas.addEventListener('pointerout', stop);
+            signatureCanvas.addEventListener('pointercancel', stop);
         }
 
         window.pulisciFirma = () => { if(signatureCtx && signatureCanvas) signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height); };
