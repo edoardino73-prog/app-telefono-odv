@@ -46,7 +46,7 @@
         .app-text h1 { font-size: 0.98rem; font-weight: 800; letter-spacing: 0.3px; line-height: 1.1; }
         .app-text span { font-size: 0.72rem; opacity: 0.9; }
 
-        .btn-header-action { background: rgba(255,255,255,0.2); border: none; color: white; padding: 7px 9px; border-radius: 9px; font-weight: 700; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 5px; text-decoration: none; }
+        .btn-header-action { background: rgba(255,255,255,0.2); border: none; color: white; padding: 7px 11px; border-radius: 9px; font-weight: 700; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 5px; text-decoration: none; }
         .btn-header-action.call { background: #10b981; }
 
         .timbratura-bar { background: white; margin: 12px 18px 0 18px; padding: 12px 16px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
@@ -95,15 +95,23 @@
         .sig-canvas { width: 100%; height: 160px; display: block; touch-action: none; }
         .sig-clear { position: absolute; top: 8px; right: 8px; background: white; border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; color: var(--text-muted);}
 
-        /* FAB MENU RAPIDO PER RICEVUTE E PREVENTIVI */
-        .fab-container { position: fixed; bottom: 22px; right: 18px; z-index: 900; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
-        .fab-item { display: none; align-items: center; gap: 8px; background: white; padding: 8px 14px; border-radius: 30px; box-shadow: 0 6px 18px rgba(0,0,0,0.2); text-decoration: none; font-weight: 700; font-size: 0.82rem; border: 1px solid var(--border); }
-        .fab-item.ricevuta { color: var(--success); }
-        .fab-item.preventivo { color: var(--primary); }
-        .fab-container.open .fab-item { display: flex; animation: slideUp 0.2s ease-out; }
-        .fab-main { width: 56px; height: 56px; border-radius: 50%; background: var(--secondary); color: white; border: none; font-size: 1.4rem; box-shadow: 0 6px 20px rgba(30, 41, 59, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        /* FAB MENU RAPIDO PER TUTTI I MODULI (SOTTO IL +) */
+        .fab-container { position: fixed; bottom: 22px; right: 18px; z-index: 900; display: flex; flex-direction: column; align-items: flex-end; gap: 9px; }
+        .fab-item { display: none; align-items: center; gap: 8px; background: white; padding: 9px 15px; border-radius: 30px; box-shadow: 0 6px 18px rgba(0,0,0,0.18); text-decoration: none; font-weight: 700; font-size: 0.83rem; border: 1px solid var(--border); color: var(--text-main); cursor: pointer; }
+        .fab-item i { width: 18px; text-align: center; }
+        .fab-item.sanif { color: #0284c7; border-color: #bae6fd; }
+        .fab-item.check { color: #d97706; border-color: #fde68a; }
+        .fab-item.cs { color: #ec4899; border-color: #fbcfe8; }
+        .fab-item.carta { color: #8b5cf6; border-color: #ddd6fe; }
+        .fab-item.ricevuta { color: var(--success); border-color: #bbf7d0; }
+        .fab-item.preventivo { color: var(--primary); border-color: #fecaca; }
+        .fab-container.open .fab-item { display: flex; animation: slideUp 0.18s ease-out; }
+        .fab-main { width: 56px; height: 56px; border-radius: 50%; background: var(--secondary); color: white; border: none; font-size: 1.45rem; box-shadow: 0 6px 20px rgba(30, 41, 59, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .fab-container.open .fab-main { transform: rotate(45deg); background: var(--primary); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .input-box-field { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.88rem; outline: none; background: #f8fafc; margin-bottom: 10px; }
+        .input-box-field:focus { border-color: var(--primary); background: white; }
 
         #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #1e293b; color: white; padding: 12px 20px; border-radius: 30px; font-size: 0.9rem; font-weight: 600; z-index: 9000; opacity: 0; transition: 0.3s; }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -111,12 +119,12 @@
 </head>
 <body>
 
-    <!-- OVERLAY PRIMO ACCESSO: INCARICO & PRIVACY VOLONTARIO (GDPR / ACCREDITAMENTO) -->
+    <!-- OVERLAY PRIMO ACCESSO: INCARICO PRIVACY VOLONTARIO -->
     <div class="modal-overlay" id="modal-privacy-volontario">
         <div class="modal-sheet">
             <div style="text-align:center; margin-bottom:12px;">
                 <i class="fa-solid fa-shield-halved" style="font-size:2.4rem; color:var(--primary);"></i>
-                <h2 style="font-size:1.15rem; font-weight:800; color:var(--text-main); margin-top:6px;">Nomina a Soggetto Autorizzato al Trattamento Dati</h2>
+                <h2 style="font-size:1.15rem; font-weight:800; color:var(--text-main); margin-top:6px;">Nomina a Soggetto Autorizzato Trattamento Dati</h2>
                 <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Regolamento UE 2016/679 (GDPR) • R.R. Umbria 6/2024</span>
             </div>
 
@@ -124,11 +132,9 @@
                 <p style="margin-bottom:6px;">Io sottoscritto/a, operatore volontario di <strong>Cuore d'Argento ODV</strong>, in relazione ai servizi di trasporto sanitario svolti per conto dell'AUSL Umbria 2 e privatamente:</p>
                 <ul style="padding-left:18px; margin-bottom:6px;">
                     <li>Mi impegno ad accedere e trattare <strong>esclusivamente i dati personali e sanitari</strong> dei pazienti affidati al mio equipaggio.</li>
-                    <li>Mi impegno al <strong>rigoroso segreto professionale e d'ufficio</strong>, astenendomi dal divulgare nomi, patologie, indirizzi o scattare foto personali.</li>
-                    <li>Prendo atto che il <strong>PIN personale di accesso è strettamente riservato</strong> e non cedibile a terzi.</li>
-                    <li>Dichiaro di aver ricevuto le istruzioni operative per la sicurezza informatica e per la tutela della riservatezza degli assistiti.</li>
+                    <li>Mi impegno al <strong>rigoroso segreto professionale e d'ufficio</strong>, astenendomi dal divulgare nomi, patologie o indirizzi.</li>
+                    <li>Prendo atto che il <strong>PIN personale di accesso è strettamente riservato</strong> e non cedibile.</li>
                 </ul>
-                <p>La violazione di tali obblighi comporta sanzioni disciplinari e legali ai sensi del D.Lgs. 196/2003 e del GDPR.</p>
             </div>
 
             <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; display:block;">Firma Digitale del Volontario per Accettazione:</label>
@@ -137,7 +143,7 @@
                 <canvas id="sig-volontario-pad" class="sig-canvas"></canvas>
             </div>
 
-            <button type="button" class="btn-confirm" onclick="confermaPrivacyVolontario()" style="width:100%; padding:14px; border-radius:12px; background:var(--primary); color:white; font-weight:800; border:none; cursor:pointer;">
+            <button type="button" onclick="confermaPrivacyVolontario()" style="width:100%; padding:14px; border-radius:12px; background:var(--primary); color:white; font-weight:800; border:none; cursor:pointer;">
                 <i class="fa-solid fa-file-signature"></i> Accetta & Sblocca Tablet
             </button>
         </div>
@@ -171,7 +177,7 @@
         </div>
     </div>
 
-    <!-- MAIN APP -->
+    <!-- MAIN APP: VISUALE INALTERATA -->
     <div id="main-app" style="display:none;">
         <header>
             <div class="app-title">
@@ -181,16 +187,9 @@
                     <span id="data-header">Tablet Operativo</span>
                 </div>
             </div>
-            <div style="display:flex; gap:6px;">
-                <!-- BOTTONI RAPIDI PREVENTIVI E RICEVUTE -->
-                <a href="preventivi.html" target="_blank" class="btn-header-action" title="Calcola Preventivo Viaggio">
-                    <i class="fa-solid fa-calculator"></i> Prev
-                </a>
-                <a href="ricevute.html" target="_blank" class="btn-header-action" style="background:#10b981;" title="Emetti Ricevuta Rimborso">
-                    <i class="fa-solid fa-file-invoice-dollar"></i> Ric
-                </a>
+            <div style="display:flex; gap:8px;">
                 <a href="tel:0744000000" class="btn-header-action call" title="Chiama Sede">
-                    <i class="fa-solid fa-phone"></i>
+                    <i class="fa-solid fa-phone"></i> Sede
                 </a>
                 <button onclick="eseguiLogout()" class="btn-header-action" title="Blocca Tablet">
                     <i class="fa-solid fa-lock"></i>
@@ -218,20 +217,119 @@
         <div class="feed" id="lista-servizi"></div>
     </div>
 
-    <!-- FLOATING ACTION BUTTON (MENU RAPIDO MOVIMENTO) -->
+    <!-- FAB: TUTTI I MODULI SOTTO IL "+" SENZA STRAVOLGERE LA SCHERMATA -->
     <div class="fab-container" id="fab-menu">
+        <div class="fab-item sanif" onclick="apriModalSanificazione()">
+            <i class="fa-solid fa-spray-can-sparkles"></i> Sanificazione PMC
+        </div>
+        <div class="fab-item check" onclick="apriModalChecklist()">
+            <i class="fa-solid fa-clipboard-check"></i> Checklist Inizio Turno
+        </div>
+        <div class="fab-item cs" onclick="mostraQRCustomerSatTablet()">
+            <i class="fa-solid fa-star"></i> QR Customer Satisfaction
+        </div>
+        <a href="carta_servizi.html" target="_blank" class="fab-item carta">
+            <i class="fa-solid fa-book-medical"></i> Carta dei Servizi
+        </a>
         <a href="ricevute.html" target="_blank" class="fab-item ricevuta">
             <i class="fa-solid fa-file-invoice-dollar"></i> Nuova Ricevuta ODV
         </a>
         <a href="preventivi.html" target="_blank" class="fab-item preventivo">
-            <i class="fa-solid fa-calculator"></i> Calcolo Preventivo Viaggio
+            <i class="fa-solid fa-calculator"></i> Calcolo Preventivo
         </a>
-        <button class="fab-main" onclick="toggleFabMenu()" title="Strumenti Rimborso & Tariffe">
+        <button class="fab-main" onclick="toggleFabMenu()" title="Strumenti e Controlli">
             <i class="fa-solid fa-plus"></i>
         </button>
     </div>
 
-    <!-- BOTTOM SHEET CHIUSURA MISSIONE -->
+    <!-- MODALE RAPIDO: SANIFICAZIONE PMC -->
+    <div class="modal-overlay" id="modal-sanificazione">
+        <div class="modal-sheet">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 style="font-size:1.1rem; color:var(--primary); font-weight:800;"><i class="fa-solid fa-spray-can-sparkles"></i> Registra Sanificazione PMC</h3>
+                <button type="button" onclick="chiudiModaliExtra()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+            </div>
+            <label style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Mezzo Sanificato</label>
+            <select id="sanif-mezzo" class="input-box-field"></select>
+
+            <label style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Tipo Intervento</label>
+            <select id="sanif-tipo" class="input-box-field">
+                <option value="Ordinaria (Fine Turno)">Ordinaria (Fine Turno / Detersione PMC)</option>
+                <option value="Straordinaria (Bio-rischio)">Straordinaria (Paziente Infettivo / Decontaminazione)</option>
+            </select>
+
+            <label style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Disinfettante Presidio Medico Chirurgico</label>
+            <input type="text" id="sanif-pmc" class="input-box-field" value="Clorossidante PMC n. 18245">
+
+            <label style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Note / Tempo di Contatto</label>
+            <input type="text" id="sanif-note" class="input-box-field" placeholder="Es. Tempo di contatto 15 min - Superfici igienizzate">
+
+            <button type="button" onclick="salvaSanificazioneRapida()" style="width:100%; padding:13px; border-radius:10px; background:var(--primary); color:white; font-weight:800; border:none; cursor:pointer;">
+                <i class="fa-solid fa-check"></i> Salva nel Registro ASL
+            </button>
+        </div>
+    </div>
+
+    <!-- MODALE RAPIDO: CHECKLIST INIZIO TURNO MEZZO -->
+    <div class="modal-overlay" id="modal-checklist">
+        <div class="modal-sheet">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 style="font-size:1.1rem; color:#d97706; font-weight:800;"><i class="fa-solid fa-clipboard-check"></i> Checklist Mezzo Inizio Turno</h3>
+                <button type="button" onclick="chiudiModaliExtra()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+            </div>
+
+            <label style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Mezzo in Uso</label>
+            <select id="check-mezzo" class="input-box-field"></select>
+
+            <label style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Chilometri Attuali Contachilometri</label>
+            <input type="number" id="check-km" class="input-box-field" placeholder="Es. 124500">
+
+            <div style="display:flex; flex-direction:column; gap:8px; margin:8px 0 14px 0; font-size:0.84rem; font-weight:600;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="check-luci" checked style="accent-color:var(--success); transform:scale(1.2);"> Luci, fari, lampeggianti e sirena OK
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="check-fluidi" checked style="accent-color:var(--success); transform:scale(1.2);"> Livelli olio/liquidi e gomme OK
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="check-clima" checked style="accent-color:var(--success); transform:scale(1.2);"> Climatizzazione vano sanitario OK
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="check-elettro" checked style="accent-color:var(--success); transform:scale(1.2);"> DAE Saver One e Bombole O2 cariche OK
+                </label>
+            </div>
+
+            <label style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Eventuali Anomalie / Guasti Segnalati</label>
+            <input type="text" id="check-note" class="input-box-field" placeholder="Lascia vuoto o scrivi 'OK' se perfetto">
+
+            <button type="button" onclick="salvaChecklistRapida()" style="width:100%; padding:13px; border-radius:10px; background:#d97706; color:white; font-weight:800; border:none; cursor:pointer;">
+                <i class="fa-solid fa-floppy-disk"></i> Registra Ispezione Mezzo
+            </button>
+        </div>
+    </div>
+
+    <!-- MODALE RAPIDO: QR CUSTOMER SATISFACTION PER IL PAZIENTE -->
+    <div class="modal-overlay" id="modal-qr-cs">
+        <div class="modal-sheet" style="text-align:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <h3 style="font-size:1.05rem; color:#ec4899; font-weight:800;"><i class="fa-solid fa-star"></i> Questionario Pazienti (ISO 9001)</h3>
+                <button type="button" onclick="chiudiModaliExtra()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
+            </div>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Fai inquadrare questo QR Code con la fotocamera dello smartphone dell'assistito o del familiare:</p>
+            
+            <div style="padding:15px; background:#f8fafc; border-radius:14px; border:1px solid var(--border); display:inline-flex; justify-content:center; align-items:center;">
+                <div id="qrcode-tablet" style="display:flex; justify-content:center; align-items:center; min-height:180px; min-width:180px;"></div>
+            </div>
+
+            <div style="margin-top:16px;">
+                <button type="button" onclick="chiudiModaliExtra()" style="width:100%; padding:11px; border-radius:10px; background:#f1f5f9; font-weight:700; border:none; cursor:pointer;">
+                    Chiudi Schermata
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM SHEET CHIUSURA MISSIONE (INALTERATO) -->
     <div class="modal-overlay" id="overlay" onclick="chiudiModaleBottomSheet()"></div>
     <div class="bottom-sheet" id="bottomSheet" style="position:fixed; bottom:-100%; left:0; right:0; background:white; border-radius:24px 24px 0 0; padding:22px; max-width:600px; margin:0 auto; z-index:7000; transition:bottom 0.3s; max-height:92vh; overflow-y:auto; box-shadow:0 -10px 40px rgba(0,0,0,0.2);">
         <div style="font-size:1.2rem; font-weight:800; text-align:center; margin-bottom:4px; color:var(--primary);">Rapporto Fine Missione</div>
@@ -279,6 +377,8 @@
     <div id="toast"></div>
 
     <script>
+        const URL_QUESTIONARIO_CS = "https://docs.google.com/forms/d/e/1FAIpQLSerxr5ggAvhPCAPKwkPGKkm5tbjsDYWIiPlguYWskejUX7g-w/viewform?usp=sharing";
+
         window.showToast = function(m) {
             const t = document.getElementById('toast');
             t.innerText = m;
@@ -299,7 +399,7 @@
         const database = firebase.database();
 
         let pinInserito = "", volontarioCorrente = "", dbRootPath = 'cuore_argento_db';
-        let tuttiTrasporti = [], volontari = [], presenze = [];
+        let tuttiTrasporti = [], volontari = [], presenze = [], mezzi = [];
         let offsetGiorno = 0, dateSettimana = [], idServizioAttivo = null, fotoScontrinoBase64 = null;
         let sigVolontarioCanvas, sigVolontarioCtx, isDrawingVol = false, hasDrawnVol = false;
 
@@ -312,13 +412,22 @@
             document.getElementById('fab-menu').classList.toggle('open');
         };
 
+        document.addEventListener('click', function(e) {
+            const fab = document.getElementById('fab-menu');
+            if (fab && !fab.contains(e.target) && fab.classList.contains('open')) {
+                fab.classList.remove('open');
+            }
+        });
+
         database.ref(dbRootPath).on('value', function(snapshot) {
             const data = snapshot.val() || {};
             volontari = estraiDati(data.volontari);
             tuttiTrasporti = estraiDati(data.trasporti);
             presenze = estraiDati(data.presenze);
+            mezzi = estraiDati(data.mezzi);
             
             popolaSelectLogin();
+            popolaSelectMezziModali();
             if(document.getElementById('main-app').style.display === 'block') {
                 renderServizi();
                 aggiornaStatoPresenzaUI();
@@ -338,6 +447,95 @@
             select.innerHTML = opts;
         }
 
+        function popolaSelectMezziModali() {
+            let opts = '';
+            if (mezzi.length === 0) {
+                opts = '<option value="Ambulanza 1">Ambulanza 1</option><option value="Pulmino Disabili">Pulmino Disabili</option>';
+            } else {
+                mezzi.forEach(function(m) {
+                    opts += '<option value="' + (m.targa || m.modello || m.id) + '">' + (m.modello || m.targa || m.id) + ' (' + (m.targa || '') + ')</option>';
+                });
+            }
+            if(document.getElementById('sanif-mezzo')) document.getElementById('sanif-mezzo').innerHTML = opts;
+            if(document.getElementById('check-mezzo')) document.getElementById('check-mezzo').innerHTML = opts;
+        }
+
+        window.chiudiModaliExtra = function() {
+            document.querySelectorAll('.modal-overlay').forEach(function(m) {
+                if(m.id !== 'overlay') m.classList.remove('active');
+            });
+        };
+
+        // --- GESTIONE AZIONI DEL MENU "+" ---
+        window.apriModalSanificazione = function() {
+            toggleFabMenu();
+            document.getElementById('modal-sanificazione').classList.add('active');
+        };
+
+        window.salvaSanificazioneRapida = function() {
+            const mezzo = document.getElementById('sanif-mezzo').value;
+            const tipo = document.getElementById('sanif-tipo').value;
+            const pmc = document.getElementById('sanif-pmc').value;
+            const note = document.getElementById('sanif-note').value;
+            const id = "SAN_" + Date.now();
+
+            getDbRef('sanificazioni/' + id).set({
+                id: id,
+                data: new Date().toISOString().split('T')[0],
+                ora: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+                mezzo: mezzo,
+                tipo: tipo,
+                pmc: pmc,
+                operatore: volontarioCorrente || "Operatore Tablet",
+                note: note || "Sanificazione registrata da tablet di bordo",
+                timestamp: Date.now()
+            }).then(function() {
+                chiudiModaliExtra();
+                window.showToast("Sanificazione registrata nel faldone ASL!");
+            });
+        };
+
+        window.apriModalChecklist = function() {
+            toggleFabMenu();
+            document.getElementById('modal-checklist').classList.add('active');
+        };
+
+        window.salvaChecklistRapida = function() {
+            const mezzo = document.getElementById('check-mezzo').value;
+            const km = document.getElementById('check-km').value;
+            const note = document.getElementById('check-note').value.trim() || 'OK';
+            const id = "CHK_" + Date.now();
+
+            getDbRef('checklists/' + id).set({
+                id: id,
+                data: new Date().toISOString().split('T')[0],
+                ora: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+                mezzo: mezzo,
+                operatore: volontarioCorrente || "Operatore Tablet",
+                km: km || 0,
+                luciSirene: document.getElementById('check-luci').checked,
+                fluidiGomme: document.getElementById('check-fluidi').checked,
+                climaSanitario: document.getElementById('check-clima').checked,
+                elettromedicaliO2: document.getElementById('check-elettro').checked,
+                note: note,
+                timestamp: Date.now()
+            }).then(function() {
+                chiudiModaliExtra();
+                window.showToast("Ispezione mezzo salvata con successo!");
+            });
+        };
+
+        window.mostraQRCustomerSatTablet = function() {
+            toggleFabMenu();
+            const qrBox = document.getElementById('qrcode-tablet');
+            if (qrBox) {
+                qrBox.innerHTML = '';
+                new QRCode(qrBox, { text: URL_QUESTIONARIO_CS, width: 180, height: 180, colorDark: "#1e293b", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
+            }
+            document.getElementById('modal-qr-cs').classList.add('active');
+        };
+
+        // --- GESTIONE PIN & ACCESSO ---
         window.aggiungiDigit = function(num) {
             if(!document.getElementById('select-login-volontario').value) { alert("Seleziona prima il tuo nome!"); return; }
             if (pinInserito.length < 4) {
@@ -366,7 +564,6 @@
                     setTimeout(initFirmaVolontario, 300);
                     return;
                 }
-
                 sbloccaAccessoOperativo();
             } else {
                 document.getElementById('login-error').style.display = 'block';
@@ -403,7 +600,7 @@
         };
 
         window.confermaPrivacyVolontario = function() {
-            if(!hasDrawnVol) { alert("È obbligatorio apporre la firma sullo schermo per confermare la presa visione."); return; }
+            if(!hasDrawnVol) { alert("È obbligatorio apporre la firma per accettazione."); return; }
             let vObj = volontari.find(function(v) { return v.nome === volontarioCorrente; });
             if(!vObj) return;
 
