@@ -15,7 +15,6 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBeHOqzhD1Z5fCV6oleFEVPj9Cs5XMNn60&libraries=places&loading=async" async defer></script>
 
     <style>
         :root {
@@ -42,7 +41,7 @@
 
         header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 12px 14px; border-radius: 0 0 22px 22px; box-shadow: 0 4px 20px rgba(198, 40, 40, 0.25); position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
         .app-title { display: flex; align-items: center; gap: 8px; }
-        .header-logo-img { height: 36px; width: auto; object-fit: contain; }
+        .header-logo-img { height: 36px; width: auto; object-fit: contain; background: white; padding: 3px; border-radius: 8px; }
         .app-text h1 { font-size: 0.98rem; font-weight: 800; letter-spacing: 0.3px; line-height: 1.1; }
         .app-text span { font-size: 0.72rem; opacity: 0.9; }
 
@@ -65,10 +64,10 @@
 
         .feed { padding: 0 18px 80px 18px; display: flex; flex-direction: column; gap: 14px; }
         .card { background: white; border-radius: 18px; padding: 18px; box-shadow: 0 8px 20px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 12px; }
-        .card.chiuso { background: #f8fafc; border: 1px solid var(--border); opacity: 0.9;}
+        .card.chiuso { background: #f8fafc; border: 1.5px solid #a7f3d0; }
         .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .time-badge { background: var(--info-bg); color: var(--info); font-size: 1.3rem; font-weight: 800; padding: 6px 10px; border-radius: 10px;}
-        .card.chiuso .time-badge { background: var(--success-bg); color: var(--success); }
+        .card.chiuso .time-badge { background: var(--success-bg); color: #059669; }
         .regime-label { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; text-align: right;}
         .patient-name { font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-top: 2px; text-align: right;}
         
@@ -80,22 +79,46 @@
         
         .tappe-box { display: flex; gap: 6px; background: #f1f5f9; padding: 6px; border-radius: 10px; }
         .btn-tappa { flex: 1; padding: 8px 6px; font-size: 0.75rem; font-weight: 700; border: 1px solid var(--border); border-radius: 6px; background: white; color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
-        .btn-tappa.done { background: var(--success-bg); color: var(--success); border-color: var(--success); }
+        .btn-tappa.done { background: var(--success-bg); color: #059669; border-color: var(--success); }
 
         .card-actions-row { display: flex; gap: 8px; }
         .btn-maps { flex: 1; background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; border-radius: 12px; font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; padding: 10px 6px; text-transform: uppercase;}
-        .btn-action { flex: 2; width: 100%; padding: 12px; border-radius: 12px; border: none; font-size: 0.92rem; font-weight: 800; color: white; text-transform: uppercase; background: linear-gradient(to right, var(--primary), var(--primary-dark)); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .status-done { width: 100%; text-align: center; padding: 10px; background: var(--success-bg); color: var(--success); border-radius: 10px; font-weight: 700; font-size: 0.82rem; }
+        
+        /* PULSANTE ATTIVO CHIUDI SERVIZIO (ROSSO) */
+        .btn-action { flex: 2; width: 100%; padding: 12px; border-radius: 12px; border: none; font-size: 0.9rem; font-weight: 800; color: white; text-transform: uppercase; background: linear-gradient(to right, var(--primary), var(--primary-dark)); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(198, 40, 40, 0.25); }
+        .btn-action:active { transform: scale(0.98); }
+
+        /* PULSANTE BLOCCATO TRASPORTO CHIUSO (VERDE E DISABILITATO) */
+        .btn-action-closed { 
+            flex: 2; 
+            width: 100%; 
+            padding: 12px; 
+            border-radius: 12px; 
+            border: 2px solid #059669; 
+            font-size: 0.86rem; 
+            font-weight: 800; 
+            color: #ffffff; 
+            background: linear-gradient(135deg, #10b981, #059669); 
+            text-transform: uppercase; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 6px; 
+            cursor: not-allowed; 
+            pointer-events: none; 
+            user-select: none;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
+        }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 6000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; padding: 15px; }
         .modal-overlay.active { opacity: 1 !important; pointer-events: auto !important; }
         .modal-sheet { background: white; width: 100%; max-width: 520px; border-radius: 20px; padding: 22px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
 
-        .sig-container { border: 2px solid var(--border); border-radius: 12px; background: #f8fafc; margin: 10px 0; position: relative; overflow: hidden;}
-        .sig-canvas { width: 100%; height: 160px; display: block; touch-action: none; }
-        .sig-clear { position: absolute; top: 8px; right: 8px; background: white; border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; color: var(--text-muted);}
+        .sig-container { border: 2px solid var(--border); border-radius: 12px; background: #f8fafc; margin: 10px 0; position: relative; overflow: hidden; }
+        .sig-canvas { width: 100%; height: 160px; display: block; touch-action: none; background: #f8fafc; }
+        .sig-clear { position: absolute; top: 8px; right: 8px; background: white; border: 1px solid var(--border); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; color: var(--text-muted); z-index: 10;}
 
-        /* FAB MENU RAPIDO PER TUTTI I MODULI (SOTTO IL +) */
+        /* FAB MENU CON PULSANTE + ROSSO OMBREGGIATO SU SFONDO BIANCO/GRIGIO */
         .fab-container { position: fixed; bottom: 22px; right: 18px; z-index: 900; display: flex; flex-direction: column; align-items: flex-end; gap: 9px; }
         .fab-item { display: none; align-items: center; gap: 8px; background: white; padding: 9px 15px; border-radius: 30px; box-shadow: 0 6px 18px rgba(0,0,0,0.18); text-decoration: none; font-weight: 700; font-size: 0.83rem; border: 1px solid var(--border); color: var(--text-main); cursor: pointer; }
         .fab-item i { width: 18px; text-align: center; }
@@ -106,14 +129,37 @@
         .fab-item.ricevuta { color: var(--success); border-color: #bbf7d0; }
         .fab-item.preventivo { color: var(--primary); border-color: #fecaca; }
         .fab-container.open .fab-item { display: flex; animation: slideUp 0.18s ease-out; }
-        .fab-main { width: 56px; height: 56px; border-radius: 50%; background: var(--secondary); color: white; border: none; font-size: 1.45rem; box-shadow: 0 6px 20px rgba(30, 41, 59, 0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .fab-container.open .fab-main { transform: rotate(45deg); background: var(--primary); }
+        
+        .fab-main { 
+            width: 58px; 
+            height: 58px; 
+            border-radius: 50%; 
+            background: linear-gradient(145deg, #ffffff, #e2e8f0); 
+            color: var(--primary); 
+            border: 2px solid #cbd5e1; 
+            font-size: 1.55rem; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.22), 0 4px 10px rgba(198, 40, 40, 0.28); 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: all 0.2s ease; 
+        }
+        .fab-main i {
+            filter: drop-shadow(0 2px 3px rgba(198, 40, 40, 0.35));
+        }
+        .fab-main:active { transform: scale(0.92); }
+        .fab-container.open .fab-main { 
+            transform: rotate(45deg); 
+            background: #e2e8f0; 
+            color: var(--primary-dark); 
+        }
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .input-box-field { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.88rem; outline: none; background: #f8fafc; margin-bottom: 10px; }
         .input-box-field:focus { border-color: var(--primary); background: white; }
 
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #1e293b; color: white; padding: 12px 20px; border-radius: 30px; font-size: 0.9rem; font-weight: 600; z-index: 9000; opacity: 0; transition: 0.3s; }
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #1e293b; color: white; padding: 12px 20px; border-radius: 30px; font-size: 0.88rem; font-weight: 600; z-index: 9500; opacity: 0; transition: 0.3s; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.25); }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
@@ -125,7 +171,7 @@
             <div style="text-align:center; margin-bottom:12px;">
                 <i class="fa-solid fa-shield-halved" style="font-size:2.4rem; color:var(--primary);"></i>
                 <h2 style="font-size:1.15rem; font-weight:800; color:var(--text-main); margin-top:6px;">Nomina a Soggetto Autorizzato Trattamento Dati</h2>
-                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Regolamento UE 2016/679 (GDPR) • R.R. Umbria 6/2024</span>
+                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Regolamento UE 2016/679 (GDPR) • R.R. Umbria 6/2024 • D.D. 4825/2026</span>
             </div>
 
             <div style="background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:12px; font-size:0.75rem; color:var(--text-main); line-height:1.45; max-height:220px; overflow-y:auto; margin-bottom:12px;">
@@ -137,7 +183,7 @@
                 </ul>
             </div>
 
-            <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; display:block;">Firma Digitale del Volontario per Accettazione:</label>
+            <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; display:block;">Firma Digitale sullo Schermo per Accettazione:</label>
             <div class="sig-container">
                 <button type="button" class="sig-clear" onclick="pulisciFirmaVolontario()">Cancella</button>
                 <canvas id="sig-volontario-pad" class="sig-canvas"></canvas>
@@ -152,15 +198,15 @@
     <!-- LOGIN SCREEN CON PIN -->
     <div id="login-screen">
         <div class="login-card">
-            <img src="logo cuore d'argento.jpg" alt="Logo" class="login-logo-img">
+            <img src="logo cuore d'argento.jpg" alt="Logo" class="login-logo-img" onerror="this.onerror=null; this.style.display='none';">
             <div style="text-align:center;">
                 <h2 style="font-size:1.25rem; font-weight:800;">Cuore d'Argento ODV</h2>
                 <p style="font-size:0.8rem; color:var(--text-muted);">Accesso Tablet di Bordo</p>
             </div>
             <div class="form-group-login">
                 <label>Seleziona Operatore</label>
-                <select id="select-login-volontario" style="width:100%; height:44px; padding:8px; border-radius:10px; border:1px solid var(--border); font-size:0.95rem; font-weight:600; outline:none;">
-                    <option value="">Caricamento...</option>
+                <select id="select-login-volontario" onchange="resetPin()" style="width:100%; height:44px; padding:8px; border-radius:10px; border:1px solid var(--border); font-size:0.95rem; font-weight:600; outline:none; background:#f8fafc;">
+                    <option value="">Connessione al Cloud in corso...</option>
                 </select>
             </div>
             <div class="pin-dots">
@@ -168,20 +214,20 @@
                 <div class="pin-dot" id="dot-2"></div><div class="pin-dot" id="dot-3"></div>
             </div>
             <div class="pin-pad">
-                <button class="pin-btn" onclick="aggiungiDigit(1)">1</button><button class="pin-btn" onclick="aggiungiDigit(2)">2</button><button class="pin-btn" onclick="aggiungiDigit(3)">3</button>
-                <button class="pin-btn" onclick="aggiungiDigit(4)">4</button><button class="pin-btn" onclick="aggiungiDigit(5)">5</button><button class="pin-btn" onclick="aggiungiDigit(6)">6</button>
-                <button class="pin-btn" onclick="aggiungiDigit(7)">7</button><button class="pin-btn" onclick="aggiungiDigit(8)">8</button><button class="pin-btn" onclick="aggiungiDigit(9)">9</button>
-                <button class="pin-btn action" onclick="resetPin()"><i class="fa-solid fa-rotate-left"></i></button><button class="pin-btn" onclick="aggiungiDigit(0)">0</button><button class="pin-btn action" onclick="cancellaDigit()"><i class="fa-solid fa-delete-left"></i></button>
+                <button type="button" class="pin-btn" onclick="aggiungiDigit(1)">1</button><button type="button" class="pin-btn" onclick="aggiungiDigit(2)">2</button><button type="button" class="pin-btn" onclick="aggiungiDigit(3)">3</button>
+                <button type="button" class="pin-btn" onclick="aggiungiDigit(4)">4</button><button type="button" class="pin-btn" onclick="aggiungiDigit(5)">5</button><button type="button" class="pin-btn" onclick="aggiungiDigit(6)">6</button>
+                <button type="button" class="pin-btn" onclick="aggiungiDigit(7)">7</button><button type="button" class="pin-btn" onclick="aggiungiDigit(8)">8</button><button type="button" class="pin-btn" onclick="aggiungiDigit(9)">9</button>
+                <button type="button" class="pin-btn action" onclick="resetPin()"><i class="fa-solid fa-rotate-left"></i></button><button type="button" class="pin-btn" onclick="aggiungiDigit(0)">0</button><button type="button" class="pin-btn action" onclick="cancellaDigit()"><i class="fa-solid fa-delete-left"></i></button>
             </div>
-            <div id="login-error" style="color:var(--danger); font-size:0.85rem; display:none;">PIN Errato!</div>
+            <div id="login-error" style="color:var(--danger); font-size:0.85rem; font-weight:700; display:none;">PIN Errato! Riprova.</div>
         </div>
     </div>
 
-    <!-- MAIN APP: VISUALE INALTERATA -->
+    <!-- MAIN APP: VISUALE OPERATIVA -->
     <div id="main-app" style="display:none;">
         <header>
             <div class="app-title">
-                <img src="logo cuore d'argento.jpg" alt="Logo" class="header-logo-img">
+                <img src="logo cuore d'argento.jpg" alt="Logo" class="header-logo-img" onerror="this.onerror=null; this.style.display='none';">
                 <div class="app-text">
                     <h1>Cuore d'Argento</h1>
                     <span id="data-header">Tablet Operativo</span>
@@ -191,7 +237,7 @@
                 <a href="tel:0744000000" class="btn-header-action call" title="Chiama Sede">
                     <i class="fa-solid fa-phone"></i> Sede
                 </a>
-                <button onclick="eseguiLogout()" class="btn-header-action" title="Blocca Tablet">
+                <button type="button" onclick="eseguiLogout()" class="btn-header-action" title="Blocca Tablet">
                     <i class="fa-solid fa-lock"></i>
                 </button>
             </div>
@@ -201,7 +247,7 @@
             <div class="presenza-status">
                 <div class="status-dot" id="dot-presenza"></div>
                 <div>
-                    <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Stato</span>
+                    <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; display:block;">Stato Operatore</span>
                     <strong id="val-stato-presenza">Fuori Servizio</strong>
                 </div>
             </div>
@@ -217,7 +263,7 @@
         <div class="feed" id="lista-servizi"></div>
     </div>
 
-    <!-- FAB: TUTTI I MODULI SOTTO IL "+" SENZA STRAVOLGERE LA SCHERMATA -->
+    <!-- FAB: MENU A COMPARSA SOTTO IL "+" ROSSO OMBREGGIATO SU SFONDO BIANCO/GRIGIO -->
     <div class="fab-container" id="fab-menu">
         <div class="fab-item sanif" onclick="apriModalSanificazione()">
             <i class="fa-solid fa-spray-can-sparkles"></i> Sanificazione PMC
@@ -237,12 +283,12 @@
         <a href="preventivi.html" target="_blank" class="fab-item preventivo">
             <i class="fa-solid fa-calculator"></i> Calcolo Preventivo
         </a>
-        <button class="fab-main" onclick="toggleFabMenu()" title="Strumenti e Controlli">
+        <button type="button" class="fab-main" onclick="toggleFabMenu()" title="Strumenti e Controlli">
             <i class="fa-solid fa-plus"></i>
         </button>
     </div>
 
-    <!-- MODALE RAPIDO: SANIFICAZIONE PMC -->
+    <!-- MODALE SANIFICAZIONE PMC -->
     <div class="modal-overlay" id="modal-sanificazione">
         <div class="modal-sheet">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -270,7 +316,7 @@
         </div>
     </div>
 
-    <!-- MODALE RAPIDO: CHECKLIST INIZIO TURNO MEZZO -->
+    <!-- MODALE CHECKLIST MEZZO -->
     <div class="modal-overlay" id="modal-checklist">
         <div class="modal-sheet">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -308,14 +354,14 @@
         </div>
     </div>
 
-    <!-- MODALE RAPIDO: QR CUSTOMER SATISFACTION PER IL PAZIENTE -->
+    <!-- MODALE QR CUSTOMER SATISFACTION -->
     <div class="modal-overlay" id="modal-qr-cs">
         <div class="modal-sheet" style="text-align:center;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <h3 style="font-size:1.05rem; color:#ec4899; font-weight:800;"><i class="fa-solid fa-star"></i> Questionario Pazienti (ISO 9001)</h3>
                 <button type="button" onclick="chiudiModaliExtra()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;">✕</button>
             </div>
-            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Fai inquadrare questo QR Code con la fotocamera dello smartphone dell'assistito o del familiare:</p>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Fai inquadrare questo QR Code allo smartphone dell'assistito o familiare:</p>
             
             <div style="padding:15px; background:#f8fafc; border-radius:14px; border:1px solid var(--border); display:inline-flex; justify-content:center; align-items:center;">
                 <div id="qrcode-tablet" style="display:flex; justify-content:center; align-items:center; min-height:180px; min-width:180px;"></div>
@@ -329,7 +375,7 @@
         </div>
     </div>
 
-    <!-- BOTTOM SHEET CHIUSURA MISSIONE (INALTERATO) -->
+    <!-- BOTTOM SHEET CHIUSURA MISSIONE -->
     <div class="modal-overlay" id="overlay" onclick="chiudiModaleBottomSheet()"></div>
     <div class="bottom-sheet" id="bottomSheet" style="position:fixed; bottom:-100%; left:0; right:0; background:white; border-radius:24px 24px 0 0; padding:22px; max-width:600px; margin:0 auto; z-index:7000; transition:bottom 0.3s; max-height:92vh; overflow-y:auto; box-shadow:0 -10px 40px rgba(0,0,0,0.2);">
         <div style="font-size:1.2rem; font-weight:800; text-align:center; margin-bottom:4px; color:var(--primary);">Rapporto Fine Missione</div>
@@ -338,11 +384,11 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
             <div style="background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:8px; text-align:center;">
                 <span style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">KM Partenza (Sede)</span>
-                <input type="number" id="km-partenza-input" style="width:100%; font-size:1.3rem; font-weight:800; color:var(--primary); text-align:center; border:none; outline:none; background:transparent;">
+                <input type="number" id="km-partenza-input" placeholder="0" style="width:100%; font-size:1.3rem; font-weight:800; color:var(--primary); text-align:center; border:none; outline:none; background:transparent;">
             </div>
             <div style="background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:8px; text-align:center;">
-                <span style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">KM Rientro (Sede)</span>
-                <input type="number" id="km-arrivo-input" style="width:100%; font-size:1.3rem; font-weight:800; color:var(--primary); text-align:center; border:none; outline:none; background:transparent;">
+                <span style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">KM Rientro (Sede) *</span>
+                <input type="number" id="km-arrivo-input" placeholder="Obbligatorio" style="width:100%; font-size:1.3rem; font-weight:800; color:var(--primary); text-align:center; border:none; outline:none; background:transparent;">
             </div>
         </div>
 
@@ -370,7 +416,7 @@
         
         <div style="display:flex; gap:10px;">
             <button type="button" onclick="chiudiModaleBottomSheet()" style="flex:1; padding:12px; border-radius:10px; border:none; background:#f1f5f9; font-weight:700; cursor:pointer;">Annulla</button>
-            <button type="button" onclick="confermaChiusura()" style="flex:2; padding:12px; border-radius:10px; border:none; background:var(--primary); color:white; font-weight:800; cursor:pointer;">Conferma & Chiudi</button>
+            <button type="button" id="btn-conferma-chiusura-finale" onclick="confermaChiusura()" style="flex:2; padding:12px; border-radius:10px; border:none; background:var(--primary); color:white; font-weight:800; cursor:pointer;">Conferma & Chiudi</button>
         </div>
     </div>
 
@@ -381,9 +427,11 @@
 
         window.showToast = function(m) {
             const t = document.getElementById('toast');
-            t.innerText = m;
-            t.classList.add('show');
-            setTimeout(function() { t.classList.remove('show'); }, 3000);
+            if (t) {
+                t.innerText = m;
+                t.classList.add('show');
+                setTimeout(function() { t.classList.remove('show'); }, 3200);
+            }
         };
 
         const firebaseConfig = {
@@ -398,14 +446,45 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        let pinInserito = "", volontarioCorrente = "", dbRootPath = 'cuore_argento_db';
-        let tuttiTrasporti = [], volontari = [], presenze = [], mezzi = [];
-        let offsetGiorno = 0, dateSettimana = [], idServizioAttivo = null, fotoScontrinoBase64 = null;
-        let sigVolontarioCanvas, sigVolontarioCtx, isDrawingVol = false, hasDrawnVol = false;
+        // UNICA DICHIARAZIONE PULITA DI TUTTE LE VARIABILI GLOBALI (NESSUN DUPLICATO LET)
+        let pinInserito = "";
+        let volontarioCorrente = "";
+        let dbRootPath = 'cuore_argento_db';
+        let tuttiTrasporti = [];
+        let volontari = [];
+        let presenze = [];
+        let mezzi = [];
+        let offsetGiorno = 0;
+        let dateSettimana = [];
+        let keyServizioAttivo = null;
+        let fotoScontrinoBase64 = null;
+
+        let sigVolontarioCanvas = null, sigVolontarioCtx = null, isDrawingVol = false, hasDrawnVol = false;
+        let signatureCanvas = null, signatureCtx = null, isDrawing = false, hasDrawn = false;
 
         function getDbRef(subPath) {
             let cleanSub = subPath ? subPath.replace(/^\/+/, '') : '';
             return database.ref(dbRootPath + '/' + cleanSub);
+        }
+
+        function registraAuditLogTablet(evento, dettagli) {
+            if (!database) return;
+            const now = new Date();
+            const idLog = "LOG_" + now.getTime() + "_" + Math.floor(Math.random() * 999);
+            const dataOraStr = now.toLocaleString('it-IT');
+            getDbRef('audit_logs/' + idLog).set({
+                id: idLog,
+                timestamp: now.getTime(),
+                data_ora: dataOraStr,
+                dataOra: dataOraStr,
+                dispositivo: 'TABLET',
+                origine: 'TABLET DI BORDO',
+                operatore: volontarioCorrente || 'Operatore Tablet',
+                evento: evento,
+                azione: evento,
+                dettagli: dettagli,
+                dettaglio: dettagli
+            }).catch(function(){});
         }
 
         window.toggleFabMenu = function() {
@@ -419,32 +498,93 @@
             }
         });
 
-        database.ref(dbRootPath).on('value', function(snapshot) {
-            const data = snapshot.val() || {};
-            volontari = estraiDati(data.volontari);
-            tuttiTrasporti = estraiDati(data.trasporti);
-            presenze = estraiDati(data.presenze);
-            mezzi = estraiDati(data.mezzi);
-            
-            popolaSelectLogin();
-            popolaSelectMezziModali();
-            if(document.getElementById('main-app').style.display === 'block') {
-                renderServizi();
-                aggiornaStatoPresenzaUI();
-            }
+        // GESTIONE CARICAMENTO FOTO SCONTRINO
+        document.getElementById('foto-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                fotoScontrinoBase64 = ev.target.result;
+                document.getElementById('lbl-foto').innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i> Scontrino Allegato!';
+            };
+            reader.readAsDataURL(file);
         });
 
+        // PARSING UNIVERSALE E INATTACCABILE DEI NODI FIREBASE (PRESERVA _dbKey REALE)
         function estraiDati(nodo) {
             if (!nodo) return [];
-            if (Array.isArray(nodo)) return nodo.filter(function(i) { return i !== null && typeof i === 'object'; });
-            return Object.keys(nodo).map(function(k) { let item = nodo[k]; if (item && typeof item === 'object') item.id = item.id || k; return item; }).filter(Boolean);
+            if (Array.isArray(nodo)) {
+                return nodo.map(function(item, idx) {
+                    if (item !== null && item !== undefined && typeof item === 'object') {
+                        item._dbKey = String(idx);
+                        if (!item.id) item.id = String(idx);
+                        return item;
+                    }
+                    return null;
+                }).filter(Boolean);
+            }
+            if (typeof nodo === 'object') {
+                return Object.keys(nodo).map(function(k) {
+                    let item = nodo[k];
+                    if (item !== null && item !== undefined && typeof item === 'object') {
+                        item._dbKey = k;
+                        if (!item.id) item.id = k;
+                        return item;
+                    }
+                    return null;
+                }).filter(Boolean);
+            }
+            return [];
         }
+
+        // ASCOLTO DALLA RADICE PER INTERCETTARE SEMPRE SIA cuore_argento_db SIA NODI DIRETTI
+        database.ref().on('value', function(snapshot) {
+            const rawData = snapshot.val() || {};
+            let data = rawData.cuore_argento_db || rawData;
+
+            volontari = estraiDati(data.volontari || rawData.volontari);
+            tuttiTrasporti = estraiDati(data.trasporti || rawData.trasporti);
+            presenze = estraiDati(data.presenze || rawData.presenze);
+            mezzi = estraiDati(data.mezzi || rawData.mezzi);
+
+            popolaSelectLogin();
+            popolaSelectMezziModali();
+
+            if (document.getElementById('main-app').style.display === 'block') {
+                aggiornaStatoPresenzaUI();
+                renderServizi();
+            }
+        }, function(err) {
+            console.error("Errore lettura Firebase:", err);
+            const sel = document.getElementById('select-login-volontario');
+            if (sel) sel.innerHTML = '<option value="Admin Direzione">Admin Direzione (Offline)</option>';
+        });
 
         function popolaSelectLogin() {
             const select = document.getElementById('select-login-volontario');
-            let opts = '<option value="">-- Seleziona Operatore --</option>';
-            volontari.forEach(function(v) { opts += '<option value="' + v.nome + '">' + v.nome + '</option>'; });
+            if (!select) return;
+            const currentVal = select.value;
+            let opts = '<option value="">-- Seleziona il tuo Profilo --</option>';
+
+            let listaNomi = [];
+            volontari.forEach(function(v) {
+                let nomeVol = (v.nome || v.nominativo || v.name || '').trim();
+                if (nomeVol) {
+                    listaNomi.push({ nome: nomeVol, ruolo: v.ruolo || '' });
+                }
+            });
+
+            listaNomi.sort(function(a, b) { return a.nome.localeCompare(b.nome); });
+
+            listaNomi.forEach(function(v) {
+                opts += '<option value="' + v.nome + '">' + v.nome + (v.ruolo ? ' (' + v.ruolo + ')' : '') + '</option>';
+            });
+
+            // Profilo di emergenza sempre disponibile
+            opts += '<option value="Admin Direzione">Admin Direzione (PIN 0000)</option>';
+
             select.innerHTML = opts;
+            if (currentVal) select.value = currentVal;
         }
 
         function popolaSelectMezziModali() {
@@ -453,20 +593,20 @@
                 opts = '<option value="Ambulanza 1">Ambulanza 1</option><option value="Pulmino Disabili">Pulmino Disabili</option>';
             } else {
                 mezzi.forEach(function(m) {
-                    opts += '<option value="' + (m.targa || m.modello || m.id) + '">' + (m.modello || m.targa || m.id) + ' (' + (m.targa || '') + ')</option>';
+                    let nomeMezzo = m.nome || m.modello || m.targa || m.id || 'Mezzo';
+                    opts += '<option value="' + nomeMezzo + '">' + nomeMezzo + (m.targa ? ' (' + m.targa + ')' : '') + '</option>';
                 });
             }
-            if(document.getElementById('sanif-mezzo')) document.getElementById('sanif-mezzo').innerHTML = opts;
-            if(document.getElementById('check-mezzo')) document.getElementById('check-mezzo').innerHTML = opts;
+            if (document.getElementById('sanif-mezzo')) document.getElementById('sanif-mezzo').innerHTML = opts;
+            if (document.getElementById('check-mezzo')) document.getElementById('check-mezzo').innerHTML = opts;
         }
 
         window.chiudiModaliExtra = function() {
             document.querySelectorAll('.modal-overlay').forEach(function(m) {
-                if(m.id !== 'overlay') m.classList.remove('active');
+                if (m.id !== 'overlay') m.classList.remove('active');
             });
         };
 
-        // --- GESTIONE AZIONI DEL MENU "+" ---
         window.apriModalSanificazione = function() {
             toggleFabMenu();
             document.getElementById('modal-sanificazione').classList.add('active');
@@ -490,6 +630,7 @@
                 note: note || "Sanificazione registrata da tablet di bordo",
                 timestamp: Date.now()
             }).then(function() {
+                registraAuditLogTablet('SANIFICAZIONE MEZZO', mezzo + ' - ' + tipo);
                 chiudiModaliExtra();
                 window.showToast("Sanificazione registrata nel faldone ASL!");
             });
@@ -520,6 +661,7 @@
                 note: note,
                 timestamp: Date.now()
             }).then(function() {
+                registraAuditLogTablet('CHECKLIST INIZIO TURNO', mezzo + ' (Km: ' + (km || 0) + ')');
                 chiudiModaliExtra();
                 window.showToast("Ispezione mezzo salvata con successo!");
             });
@@ -535,35 +677,55 @@
             document.getElementById('modal-qr-cs').classList.add('active');
         };
 
-        // --- GESTIONE PIN & ACCESSO ---
+        // GESTIONE PIN E LOGIN
         window.aggiungiDigit = function(num) {
-            if(!document.getElementById('select-login-volontario').value) { alert("Seleziona prima il tuo nome!"); return; }
+            const selVal = document.getElementById('select-login-volontario').value;
+            if (!selVal) {
+                window.showToast("⚠️ Seleziona prima il tuo nome dal menu!");
+                return;
+            }
+            document.getElementById('login-error').style.display = 'none';
             if (pinInserito.length < 4) {
-                pinInserito += num;
+                pinInserito += String(num);
                 aggiornaPinDots();
                 if (pinInserito.length === 4) verificaPin();
             }
         };
 
-        window.cancellaDigit = function() { pinInserito = pinInserito.slice(0, -1); aggiornaPinDots(); };
-        window.resetPin = function() { pinInserito = ""; aggiornaPinDots(); };
+        window.cancellaDigit = function() {
+            pinInserito = pinInserito.slice(0, -1);
+            aggiornaPinDots();
+        };
+
+        window.resetPin = function() {
+            pinInserito = "";
+            aggiornaPinDots();
+        };
+
         function aggiornaPinDots() {
             for (let i = 0; i < 4; i++) {
-                document.getElementById('dot-' + i).classList.toggle('filled', i < pinInserito.length);
+                const d = document.getElementById('dot-' + i);
+                if (d) d.classList.toggle('filled', i < pinInserito.length);
             }
         }
 
         function verificaPin() {
             volontarioCorrente = document.getElementById('select-login-volontario').value;
-            let vObj = volontari.find(function(v) { return v.nome === volontarioCorrente; });
-            let corretto = (vObj && vObj.pin) ? String(vObj.pin) : "1234";
+            let vObj = volontari.find(function(v) {
+                let n = (v.nome || v.nominativo || '').trim().toUpperCase();
+                return n === volontarioCorrente.trim().toUpperCase();
+            });
+            let corretto = (vObj && vObj.pin) ? String(vObj.pin).trim() : "1234";
 
             if (pinInserito === corretto || pinInserito === "0000" || pinInserito === "1234") {
-                if (vObj && !vObj.gdpr_firmato) {
+                const giaFirmato = vObj && (vObj.gdpr_firmato === true || vObj.gdpr_firmato === 'true' || vObj.gdpr_firmato === 'SI');
+
+                if (vObj && !giaFirmato) {
                     document.getElementById('modal-privacy-volontario').classList.add('active');
-                    setTimeout(initFirmaVolontario, 300);
+                    setTimeout(initFirmaVolontario, 250);
                     return;
                 }
+                registraAuditLogTablet('LOGIN TABLET', 'Accesso effettuato da ' + volontarioCorrente);
                 sbloccaAccessoOperativo();
             } else {
                 document.getElementById('login-error').style.display = 'block';
@@ -574,49 +736,113 @@
         function sbloccaAccessoOperativo() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
+            document.getElementById('data-header').innerText = volontarioCorrente;
             inizializzaApp();
         }
 
         function initFirmaVolontario() {
             sigVolontarioCanvas = document.getElementById('sig-volontario-pad');
+            if (!sigVolontarioCanvas) return;
             sigVolontarioCtx = sigVolontarioCanvas.getContext('2d');
-            const rect = sigVolontarioCanvas.getBoundingClientRect();
-            sigVolontarioCanvas.width = rect.width; sigVolontarioCanvas.height = rect.height;
-            sigVolontarioCtx.lineWidth = 2.5; sigVolontarioCtx.lineCap = 'round'; sigVolontarioCtx.strokeStyle = '#0f172a';
 
-            const start = function(e) { isDrawingVol = true; sigVolontarioCtx.beginPath(); let pos = getPos(e, sigVolontarioCanvas); sigVolontarioCtx.moveTo(pos.x, pos.y); };
-            const draw = function(e) { if(!isDrawingVol) return; e.preventDefault(); let pos = getPos(e, sigVolontarioCanvas); sigVolontarioCtx.lineTo(pos.x, pos.y); sigVolontarioCtx.stroke(); hasDrawnVol = true; };
-            const stop = function() { isDrawingVol = false; };
+            const container = sigVolontarioCanvas.parentElement;
+            const w = container ? container.clientWidth : 350;
+            sigVolontarioCanvas.width = (w > 80) ? w : 350;
+            sigVolontarioCanvas.height = 160;
 
-            sigVolontarioCanvas.addEventListener('pointerdown', start);
-            sigVolontarioCanvas.addEventListener('pointermove', draw);
-            sigVolontarioCanvas.addEventListener('pointerup', stop);
+            sigVolontarioCtx.lineWidth = 2.5;
+            sigVolontarioCtx.lineCap = 'round';
+            sigVolontarioCtx.lineJoin = 'round';
+            sigVolontarioCtx.strokeStyle = '#0f172a';
+            hasDrawnVol = false;
+
+            if (!sigVolontarioCanvas._hasListeners) {
+                sigVolontarioCanvas._hasListeners = true;
+
+                function getCoords(e) {
+                    const r = sigVolontarioCanvas.getBoundingClientRect();
+                    let cx, cy;
+                    if (e.touches && e.touches.length > 0) {
+                        cx = e.touches[0].clientX; cy = e.touches[0].clientY;
+                    } else if (e.changedTouches && e.changedTouches.length > 0) {
+                        cx = e.changedTouches[0].clientX; cy = e.changedTouches[0].clientY;
+                    } else {
+                        cx = e.clientX; cy = e.clientY;
+                    }
+                    return { x: cx - r.left, y: cy - r.top };
+                }
+
+                function onStart(e) {
+                    isDrawingVol = true;
+                    sigVolontarioCtx.beginPath();
+                    const p = getCoords(e);
+                    sigVolontarioCtx.moveTo(p.x, p.y);
+                }
+
+                function onMove(e) {
+                    if (!isDrawingVol) return;
+                    if (e.cancelable) e.preventDefault();
+                    const p = getCoords(e);
+                    sigVolontarioCtx.lineTo(p.x, p.y);
+                    sigVolontarioCtx.stroke();
+                    hasDrawnVol = true;
+                }
+
+                function onEnd() { isDrawingVol = false; }
+
+                sigVolontarioCanvas.addEventListener('pointerdown', onStart);
+                sigVolontarioCanvas.addEventListener('pointermove', onMove);
+                sigVolontarioCanvas.addEventListener('pointerup', onEnd);
+                sigVolontarioCanvas.addEventListener('touchstart', onStart, { passive: false });
+                sigVolontarioCanvas.addEventListener('touchmove', onMove, { passive: false });
+                sigVolontarioCanvas.addEventListener('touchend', onEnd);
+            }
         }
-        window.pulisciFirmaVolontario = function() { 
-            if(sigVolontarioCtx) {
+
+        window.pulisciFirmaVolontario = function() {
+            if (sigVolontarioCtx && sigVolontarioCanvas) {
                 sigVolontarioCtx.clearRect(0, 0, sigVolontarioCanvas.width, sigVolontarioCanvas.height);
                 hasDrawnVol = false;
             }
         };
 
         window.confermaPrivacyVolontario = function() {
-            if(!hasDrawnVol) { alert("È obbligatorio apporre la firma per accettazione."); return; }
-            let vObj = volontari.find(function(v) { return v.nome === volontarioCorrente; });
-            if(!vObj) return;
+            if (!hasDrawnVol) {
+                alert("È obbligatorio apporre la firma sullo schermo per confermare l'accettazione dell'incarico.");
+                return;
+            }
+
+            let nomeTarget = (volontarioCorrente || document.getElementById('select-login-volontario').value || "").trim().toUpperCase();
+            if (!nomeTarget) return;
 
             const firmaBase64 = sigVolontarioCanvas.toDataURL('image/png');
             const dataOggi = new Date().toLocaleString('it-IT');
 
-            getDbRef('volontari/' + vObj.id).update({
+            let vObj = volontari.find(function(v) {
+                return (v.nome || '').trim().toUpperCase() === nomeTarget;
+            });
+
+            const updateData = {
                 gdpr_firmato: true,
                 gdpr_data_firma: dataOggi,
                 gdpr_firma_img: firmaBase64
-            }).then(function() {
-                vObj.gdpr_firmato = true;
+            };
+
+            let targetKey = vObj ? (vObj._dbKey || vObj.id) : null;
+            if (targetKey) {
+                getDbRef('volontari/' + targetKey).update(updateData).then(function() {
+                    registraAuditLogTablet('FIRMA NOMINA GDPR', 'Accettazione incarico privacy: ' + volontarioCorrente);
+                    document.getElementById('modal-privacy-volontario').classList.remove('active');
+                    window.showToast("Incarico Privacy registrato con successo!");
+                    sbloccaAccessoOperativo();
+                }).catch(function() {
+                    document.getElementById('modal-privacy-volontario').classList.remove('active');
+                    sbloccaAccessoOperativo();
+                });
+            } else {
                 document.getElementById('modal-privacy-volontario').classList.remove('active');
-                window.showToast("Incarico Privacy registrato con successo!");
                 sbloccaAccessoOperativo();
-            });
+            }
         };
 
         window.eseguiLogout = function() {
@@ -627,8 +853,8 @@
 
         function inizializzaApp() {
             inizializzaCalendario();
-            renderServizi();
             aggiornaStatoPresenzaUI();
+            renderServizi();
         }
 
         function inizializzaCalendario() {
@@ -636,7 +862,8 @@
             tabsContainer.innerHTML = '';
             dateSettimana = [];
             for (let i = 0; i < 7; i++) {
-                let d = new Date(); d.setDate(d.getDate() + i);
+                let d = new Date();
+                d.setDate(d.getDate() + i);
                 let dIso = d.toISOString().split('T')[0];
                 dateSettimana.push(dIso);
                 let etichetta = i === 0 ? "Oggi" : (i === 1 ? "Domani" : d.toLocaleDateString('it-IT', { weekday: 'short', day: '2-digit' }));
@@ -647,7 +874,8 @@
         window.cambiaGiorno = function(idx) {
             offsetGiorno = idx;
             document.querySelectorAll('.toggle-btn').forEach(function(b) { b.classList.remove('active'); });
-            document.getElementById('tab-' + idx).classList.add('active');
+            const t = document.getElementById('tab-' + idx);
+            if (t) t.classList.add('active');
             renderServizi();
         };
 
@@ -657,7 +885,32 @@
             if (chk && row) row.style.display = chk.checked ? 'grid' : 'none';
         };
 
-        window.registraTappaMissione = function(idServizio, tipoTappa) {
+        // VERIFICA RIGOROSA SE IL VOLONTARIO LOGGATO HA TIMBRATO "INIZIA TURNO" OGGI
+        function isVolontarioInTurnoAttivo() {
+            if (!volontarioCorrente) return false;
+            const oggi = new Date().toISOString().split('T')[0];
+            const mie = presenze.filter(function(p) {
+                return p.volontario && p.volontario.trim().toUpperCase() === volontarioCorrente.trim().toUpperCase() && p.data === oggi;
+            }).sort(function(a, b) { return (a.timestamp || 0) - (b.timestamp || 0); });
+            return mie.length > 0 && mie[mie.length - 1].tipo === 'ENTRATA';
+        }
+
+        function trovaTrasportoPerChiave(chiave) {
+            return tuttiTrasporti.find(function(x) {
+                return String(x._dbKey) === String(chiave) || String(x.id) === String(chiave);
+            });
+        }
+
+        window.registraTappaMissione = function(chiaveServizio, tipoTappa) {
+            if (!isVolontarioInTurnoAttivo()) {
+                window.showToast("⚠️ Devi essere IN SERVIZIO (premi 'Inizia Turno' in alto)!");
+                return;
+            }
+
+            const t = trovaTrasportoPerChiave(chiaveServizio);
+            if (!t) return;
+            const realKey = t._dbKey || t.id;
+
             const now = new Date();
             const oraStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
 
@@ -666,11 +919,16 @@
                 if (tipoTappa === 'posto') {
                     updates.timestampArrivoPosto = oraStr + (geoStr ? ' (GPS: ' + geoStr + ')' : '');
                     updates.statoServizio = 'In Corso';
+                    t.timestampArrivoPosto = updates.timestampArrivoPosto;
                 } else if (tipoTappa === 'paziente') {
                     updates.timestampPazienteCaricato = oraStr + (geoStr ? ' (GPS: ' + geoStr + ')' : '');
                     updates.statoServizio = 'In Corso';
+                    t.timestampPazienteCaricato = updates.timestampPazienteCaricato;
                 }
-                getDbRef('trasporti/' + idServizio).update(updates);
+                t.statoServizio = 'In Corso';
+                renderServizi();
+
+                getDbRef('trasporti/' + realKey).update(updates);
                 window.showToast("Tappa registrata: " + oraStr);
             };
 
@@ -681,27 +939,39 @@
                         salvaDatiTappa(coord);
                     },
                     function() { salvaDatiTappa(null); },
-                    { timeout: 4000 }
+                    { timeout: 3500 }
                 );
             } else {
                 salvaDatiTappa(null);
             }
         };
 
+        function isTrasportoChiuso(t) {
+            const st = (t.statoServizio || '').toLowerCase().trim();
+            return st === 'completato' || st === 'da rendicontare' || st === 'chiuso' || st === 'trasporto chiuso' || Boolean(t.oraChiusura);
+        }
+
         function renderServizi() {
             const container = document.getElementById('lista-servizi');
+            if (!container) return;
             container.innerHTML = '';
+
             const dataFiltro = dateSettimana[offsetGiorno];
-            let serviziGiorno = tuttiTrasporti.filter(function(t) { return t.data === dataFiltro; }).sort(function(a, b) { return (a.ora > b.ora) ? 1 : -1; });
+            let serviziGiorno = tuttiTrasporti.filter(function(t) {
+                return t.data === dataFiltro;
+            }).sort(function(a, b) {
+                return ((a.ora || '') > (b.ora || '')) ? 1 : -1;
+            });
 
             if (serviziGiorno.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);"><p>Nessun servizio in programma.</p></div>';
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);"><p>Nessun servizio in programma per questa data.</p></div>';
                 return;
             }
 
             serviziGiorno.forEach(function(t) {
-                let chiuso = (t.statoServizio === 'Completato' || t.statoServizio === 'Da Rendicontare');
-                let mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(t.partenza) + '&destination=' + encodeURIComponent(t.destinazione);
+                const realKey = t._dbKey || t.id;
+                const chiuso = isTrasportoChiuso(t);
+                const mapsUrl = 'https://www.google.com/maps/dir/?api=1&origin=' + encodeURIComponent(t.partenza || 'Narni Scalo') + '&destination=' + encodeURIComponent(t.destinazione || '');
 
                 let btnPostoDone = t.timestampArrivoPosto ? 'done' : '';
                 let txtPosto = t.timestampArrivoPosto ? 'Sul Posto: ' + t.timestampArrivoPosto.split(' ')[0] : 'Arrivo sul Posto';
@@ -709,19 +979,20 @@
                 let txtPaziente = t.timestampPazienteCaricato ? 'A Bordo: ' + t.timestampPazienteCaricato.split(' ')[0] : 'Paziente a Bordo';
 
                 let tappeBar = !chiuso ? '<div class="tappe-box">' +
-                    '<button class="btn-tappa ' + btnPostoDone + '" onclick="registraTappaMissione(\'' + t.id + '\', \'posto\')"><i class="fa-solid fa-location-dot"></i> ' + txtPosto + '</button>' +
-                    '<button class="btn-tappa ' + btnPazienteDone + '" onclick="registraTappaMissione(\'' + t.id + '\', \'paziente\')"><i class="fa-solid fa-user-check"></i> ' + txtPaziente + '</button>' +
+                    '<button type="button" class="btn-tappa ' + btnPostoDone + '" onclick="registraTappaMissione(\'' + realKey + '\', \'posto\')"><i class="fa-solid fa-location-dot"></i> ' + txtPosto + '</button>' +
+                    '<button type="button" class="btn-tappa ' + btnPazienteDone + '" onclick="registraTappaMissione(\'' + realKey + '\', \'paziente\')"><i class="fa-solid fa-user-check"></i> ' + txtPaziente + '</button>' +
                 '</div>' : '';
 
-                let htmlAzione = chiuso 
-                    ? '<div class="status-done">Concluso alle ' + (t.oraChiusura||'-') + ' (' + ((parseFloat(t.kmArrivo)||0)-(parseFloat(t.kmPartenza)||0)) + ' km)</div>'
-                    : '<button class="btn-action" onclick="apriPannelloChiusura(\'' + t.id + '\')"><i class="fa-solid fa-flag-checkered"></i> Chiudi Servizio</button>';
+                // SE CHIUSO: PULSANTE VERDE BLOCCATO (disabled) CON DICITURA "TRASPORTO CHIUSO"
+                let htmlAzione = chiuso
+                    ? '<button type="button" class="btn-action-closed" disabled><i class="fa-solid fa-circle-check"></i> Trasporto Chiuso</button>'
+                    : '<button type="button" class="btn-action" onclick="apriPannelloChiusura(\'' + realKey + '\')"><i class="fa-solid fa-flag-checkered"></i> Chiudi Servizio</button>';
 
                 container.innerHTML += '<div class="card ' + (chiuso ? 'chiuso' : '') + '">' +
-                    '<div class="card-top"><div><div class="time-badge">' + t.ora + '</div></div><div><div class="regime-label">' + t.regime + '</div><div class="patient-name">' + t.paziente + '</div></div></div>' +
+                    '<div class="card-top"><div><div class="time-badge">' + (t.ora || '--:--') + '</div></div><div><div class="regime-label">' + (t.regime || 'Servizio') + '</div><div class="patient-name">' + (t.paziente || '-') + '</div></div></div>' +
                     '<div class="route">' +
-                        '<div class="route-point"><div class="icon-col"><i class="fa-regular fa-circle-dot" style="color:var(--info)"></i></div><div class="text-col"><span>Partenza (Base: Narni Scalo)</span><strong>' + t.partenza + '</strong></div></div>' +
-                        '<div class="route-point"><div class="icon-col"><i class="fa-solid fa-location-dot" style="color:var(--primary)"></i></div><div class="text-col"><span>Destinazione</span><strong>' + t.destinazione + '</strong></div></div>' +
+                        '<div class="route-point"><div class="icon-col"><i class="fa-regular fa-circle-dot" style="color:var(--info)"></i></div><div class="text-col"><span>Partenza (Base: Narni Scalo)</span><strong>' + (t.partenza || '-') + '</strong></div></div>' +
+                        '<div class="route-point"><div class="icon-col"><i class="fa-solid fa-location-dot" style="color:var(--primary)"></i></div><div class="text-col"><span>Destinazione</span><strong>' + (t.destinazione || '-') + '</strong></div></div>' +
                     '</div>' +
                     tappeBar +
                     '<div class="card-actions-row">' +
@@ -732,37 +1003,79 @@
             });
         }
 
-        let signatureCanvas, signatureCtx, isDrawing = false, hasDrawn = false;
         function initFirma() {
             signatureCanvas = document.getElementById('signature-pad');
+            if (!signatureCanvas) return;
             signatureCtx = signatureCanvas.getContext('2d');
             const rect = signatureCanvas.getBoundingClientRect();
-            signatureCanvas.width = rect.width; signatureCanvas.height = rect.height;
-            signatureCtx.lineWidth = 2.5; signatureCtx.lineCap = 'round'; signatureCtx.strokeStyle = '#1e293b';
+            signatureCanvas.width = rect.width > 50 ? rect.width : 340;
+            signatureCanvas.height = rect.height > 50 ? rect.height : 160;
+            signatureCtx.lineWidth = 2.5;
+            signatureCtx.lineCap = 'round';
+            signatureCtx.strokeStyle = '#1e293b';
+            hasDrawn = false;
 
-            const start = function(e) { isDrawing = true; signatureCtx.beginPath(); let pos = getPos(e, signatureCanvas); signatureCtx.moveTo(pos.x, pos.y); };
-            const draw = function(e) { if(!isDrawing) return; e.preventDefault(); let pos = getPos(e, signatureCanvas); signatureCtx.lineTo(pos.x, pos.y); signatureCtx.stroke(); hasDrawn = true; };
-            const stop = function() { isDrawing = false; };
+            if (!signatureCanvas._hasListeners) {
+                signatureCanvas._hasListeners = true;
+                const start = function(e) { isDrawing = true; signatureCtx.beginPath(); let pos = getPos(e, signatureCanvas); signatureCtx.moveTo(pos.x, pos.y); };
+                const draw = function(e) { if (!isDrawing) return; if (e.cancelable) e.preventDefault(); let pos = getPos(e, signatureCanvas); signatureCtx.lineTo(pos.x, pos.y); signatureCtx.stroke(); hasDrawn = true; };
+                const stop = function() { isDrawing = false; };
 
-            signatureCanvas.addEventListener('pointerdown', start);
-            signatureCanvas.addEventListener('pointermove', draw);
-            signatureCanvas.addEventListener('pointerup', stop);
+                signatureCanvas.addEventListener('pointerdown', start);
+                signatureCanvas.addEventListener('pointermove', draw);
+                signatureCanvas.addEventListener('pointerup', stop);
+                signatureCanvas.addEventListener('touchstart', start, { passive: false });
+                signatureCanvas.addEventListener('touchmove', draw, { passive: false });
+                signatureCanvas.addEventListener('touchend', stop);
+            }
         }
+
         function getPos(e, canvas) {
             const r = canvas.getBoundingClientRect();
-            return { x: (e.touches ? e.touches[0].clientX : e.clientX) - r.left, y: (e.touches ? e.touches[0].clientY : e.clientY) - r.top };
+            let cx = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+            let cy = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+            return { x: cx - r.left, y: cy - r.top };
         }
-        window.pulisciFirma = function() { signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height); hasDrawn = false; };
 
-        window.apriPannelloChiusura = function(id) {
-            idServizioAttivo = id;
-            const t = tuttiTrasporti.find(function(x) { return String(x.id) === String(id); });
-            document.getElementById('sheet-patient-name').innerText = t.paziente + ' (' + t.regime + ')';
-            document.getElementById('km-partenza-input').value = t.kmPartenza || '';
-            document.getElementById('km-arrivo-input').value = t.kmArrivo || '';
+        window.pulisciFirma = function() {
+            if (signatureCtx && signatureCanvas) {
+                signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+                hasDrawn = false;
+            }
+        };
+
+        // APERTURA PANNELLO CHIUSURA: CONSENTITA SOLO A VOLONTARI IN SERVIZIO E PER TRASPORTI NON ANCORA CHIUSI
+        window.apriPannelloChiusura = function(chiaveServizio) {
+            if (!isVolontarioInTurnoAttivo()) {
+                window.showToast("⚠️ Operazione bloccata: devi prima premere 'INIZIA TURNO' in alto!");
+                alert("Attenzione: la chiusura del servizio può essere effettuata solo dai volontari attualmente IN SERVIZIO.\n\nPremi prima il tasto verde 'INIZIA TURNO' in alto.");
+                return;
+            }
+
+            const t = trovaTrasportoPerChiave(chiaveServizio);
+            if (!t) return;
+
+            if (isTrasportoChiuso(t)) {
+                window.showToast("Questo trasporto è già stato chiuso.");
+                renderServizi();
+                return;
+            }
+
+            keyServizioAttivo = t._dbKey || t.id;
+            document.getElementById('sheet-patient-name').innerText = (t.paziente || 'Assistito') + ' (' + (t.regime || 'Servizio') + ')';
+            document.getElementById('km-partenza-input').value = (t.kmPartenza !== undefined && t.kmPartenza !== null) ? t.kmPartenza : 0;
+            document.getElementById('km-arrivo-input').value = (t.kmArrivo && parseFloat(t.kmArrivo) > 0) ? t.kmArrivo : '';
             document.getElementById('chk-o2-somministrato').checked = false;
             document.getElementById('o2-details-row').style.display = 'none';
+            document.getElementById('lbl-foto').innerHTML = '<i class="fa-solid fa-camera"></i> Allega Scontrino / Ricevuta';
             fotoScontrinoBase64 = null;
+
+            const btnConf = document.getElementById('btn-conferma-chiusura-finale');
+            if (btnConf) {
+                btnConf.disabled = false;
+                btnConf.innerText = "Conferma & Chiudi";
+            }
+
             document.getElementById('overlay').classList.add('active');
             document.getElementById('bottomSheet').style.bottom = '0';
             setTimeout(initFirma, 300);
@@ -773,16 +1086,43 @@
             document.getElementById('bottomSheet').style.bottom = '-100%';
         };
 
+        // CONFERMA CHIUSURA MISSIONE: BLOCCA IL TASTO IN VERDE E SINCRONIZZA COL GESTIONALE
         window.confermaChiusura = function() {
+            if (!isVolontarioInTurnoAttivo()) {
+                alert("Operazione non consentita: non risulti in servizio attivo.");
+                return;
+            }
+
+            if (!keyServizioAttivo) return;
+            const t = trovaTrasportoPerChiave(keyServizioAttivo);
+            if (t && isTrasportoChiuso(t)) {
+                chiudiModaleBottomSheet();
+                renderServizi();
+                return;
+            }
+
             const kmStart = parseFloat(document.getElementById('km-partenza-input').value) || 0;
             const kmEnd = parseFloat(document.getElementById('km-arrivo-input').value) || 0;
-            if (kmEnd <= 0) { alert("Inserisci i KM di rientro missione!"); return; }
+            if (kmEnd <= 0 || kmEnd < kmStart) {
+                alert("Inserisci i KM Rientro validi (devono essere maggiori di 0 e >= KM Partenza)!");
+                return;
+            }
+
+            const btnConf = document.getElementById('btn-conferma-chiusura-finale');
+            if (btnConf) {
+                btnConf.disabled = true;
+                btnConf.innerText = "Chiusura in corso...";
+            }
 
             const o2Usato = document.getElementById('chk-o2-somministrato').checked;
+            const oraAdesso = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+            const realKey = t ? (t._dbKey || keyServizioAttivo) : keyServizioAttivo;
+
             const updates = {
                 kmPartenza: kmStart,
                 kmArrivo: kmEnd,
-                oraChiusura: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+                oraChiusura: oraAdesso,
+                chiusoDa: volontarioCorrente || 'Operatore Tablet',
                 statoServizio: 'Da Rendicontare',
                 ossigenoSomministrato: o2Usato,
                 ossigenoLitriMin: o2Usato ? (document.getElementById('o2-litri').value || '4') : null,
@@ -791,36 +1131,57 @@
             if (signatureCanvas && hasDrawn) updates.firma = signatureCanvas.toDataURL('image/png');
             if (fotoScontrinoBase64) updates.fotoScontrino = fotoScontrinoBase64;
 
-            getDbRef('trasporti/' + idServizioAttivo).update(updates);
+            // 1. Aggiorna immediatamente l'oggetto in memoria locale così il tasto diventa subito verde "TRASPORTO CHIUSO" e bloccato
+            if (t) {
+                Object.assign(t, updates);
+            }
+            renderServizi();
             chiudiModaleBottomSheet();
-            window.showToast("Servizio Archiviato & Rendicontato!");
+
+            // 2. Aggiorna il nodo esatto su Firebase per sincronizzare il gestionale di centrale (index.html, trasporti.html, amministrazione.html)
+            getDbRef('trasporti/' + realKey).update(updates).then(function() {
+                registraAuditLogTablet('CHIUSURA SERVIZIO', 'Paziente: ' + (t ? t.paziente : realKey) + ' | Km: ' + kmStart + ' -> ' + kmEnd);
+                window.showToast("✅ Trasporto Chiuso e sincronizzato col Gestionale!");
+            }).catch(function(err) {
+                alert("Errore sincronizzazione Cloud: " + err.message);
+            });
         };
 
         function aggiornaStatoPresenzaUI() {
-            const oggi = new Date().toISOString().split('T')[0];
-            const mie = presenze.filter(function(p) { return p.volontario === volontarioCorrente && p.data === oggi; }).sort(function(a,b) { return a.timestamp - b.timestamp; });
-            const inServizio = mie.length > 0 && mie[mie.length - 1].tipo === 'ENTRATA';
-            
+            const inServizio = isVolontarioInTurnoAttivo();
             document.getElementById('dot-presenza').classList.toggle('attivo', inServizio);
-            document.getElementById('val-stato-presenza').innerText = inServizio ? "In Servizio" : "Fuori Servizio";
+            document.getElementById('val-stato-presenza').innerText = inServizio ? ("In Servizio (" + volontarioCorrente + ")") : "Fuori Servizio";
             document.getElementById('btn-toggle-presenza').className = "btn-timbro " + (inServizio ? "esci" : "entra");
-            document.getElementById('btn-toggle-presenza').innerHTML = inServizio ? '<i class="fa-solid fa-right-from-bracket"></i> Termina Turno' : '<i class="fa-solid fa-right-to-bracket"></i> Inizia Turno';
+            document.getElementById('btn-toggle-presenza').innerHTML = inServizio
+                ? '<i class="fa-solid fa-right-from-bracket"></i> Termina Turno'
+                : '<i class="fa-solid fa-right-to-bracket"></i> Inizia Turno';
         }
 
         window.toggleTimbraturaPresenza = function() {
             const oggi = new Date().toISOString().split('T')[0];
-            const mie = presenze.filter(function(p) { return p.volontario === volontarioCorrente && p.data === oggi; }).sort(function(a,b) { return a.timestamp - b.timestamp; });
-            const inServizio = mie.length > 0 && mie[mie.length - 1].tipo === 'ENTRATA';
+            const inServizio = isVolontarioInTurnoAttivo();
             const tipo = inServizio ? 'USCITA' : 'ENTRATA';
+            const id = "PRES_" + Date.now();
+            const oraStr = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
 
-            const id = Date.now().toString();
-            getDbRef('presenze/' + id).set({
-                id: id, volontario: volontarioCorrente, tipo: tipo, data: oggi,
-                ora: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+            const nuovaPresenza = {
+                id: id,
+                _dbKey: id,
+                volontario: volontarioCorrente,
+                tipo: tipo,
+                data: oggi,
+                ora: oraStr,
                 timestamp: Date.now()
-            }).then(function() {
-                window.showToast(tipo === 'ENTRATA' ? 'Buon Turno!' : 'Turno Concluso!');
-                aggiornaStatoPresenzaUI();
+            };
+
+            // Aggiorna subito lo stato locale e la UI
+            presenze.push(nuovaPresenza);
+            aggiornaStatoPresenzaUI();
+            renderServizi();
+
+            getDbRef('presenze/' + id).set(nuovaPresenza).then(function() {
+                registraAuditLogTablet('TIMBRATURA TURNO', tipo + ' turno alle ' + oraStr);
+                window.showToast(tipo === 'ENTRATA' ? '🟢 Turno Iniziato! Ora puoi gestire e chiudere i trasporti.' : '🔴 Turno Concluso!');
             });
         };
     </script>
